@@ -1,0 +1,18 @@
+url: "https://florisdobber.com"
+baseurl: ""
+title: "Floris Dobber"
+description: >-
+  Floris Dobber's Personal Website
+author: "Floris Dobber"
+
+permalink: pretty
+collections:
+  projects:
+    output: true
+    
+
+name: "Floris Dobber"
+job-title: "Master's student at UCL"
+github: "florisdobber"
+linkedin: "floris-dobber"
+email: "&#102;&#108;&#111;&#114;&#105;&#115;&#100;&#111;&#98;&#98;&#101;&#114;@gmail.com"

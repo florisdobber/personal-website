@@ -1,0 +1,237 @@
+:root {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--paper);
+
+    --black: #100F0F;
+    --ui: #E6E4D9;
+    --bg-2: #F2F0E5;
+    --paper: #FFFCF0;
+    --muted: #6F6E69;
+    --faint: #B7B5AC;
+    --active: #24837B;
+
+    --default-page-width: 52.5vw;
+    --scale-factor: 1;
+    --page-width: calc(var(--default-page-width) * var(--scale-factor));
+}
+
+@supports (font-variation-settings: normal) {
+    :root {
+        font-family: 'Inter var', sans-serif;
+    }
+}
+
+@media (max-width: 1000px) {
+    :root {
+        --scale-factor: 1.25;
+        --page-width: calc(var(--default-page-width) * var(--scale-factor));
+    }
+}
+
+@media (max-width: 800px) {
+    :root {
+        --scale-factor: 1.5;
+        --page-width: calc(var(--default-page-width) * var(--scale-factor));
+    }
+}
+
+@media (max-width: 600px) {
+    :root {
+        --scale-factor: 1.75;
+        --page-width: calc(var(--default-page-width) * var(--scale-factor));
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+    overflow: auto;  /* Ensure content can still scroll */
+}
+
+body::-webkit-scrollbar {
+    display: none;
+}
+
+h1 {
+    font-size: calc(3vw * var(--scale-factor));
+    color: var(--black);
+    margin: 1vw;
+    margin-left: 0;
+    font-weight: 500;
+}
+
+h2 {
+    font-size: calc(2vw * var(--scale-factor));
+    color: var(--black);
+    margin: 1vw;
+    margin-left: 0;
+    font-weight: 500;
+}
+
+p {
+    font-size: calc(1.5vw * var(--scale-factor));
+    margin: 0 1vw 2vw 0;
+}
+
+li {
+    font-size: calc(1.5vw * var(--scale-factor));
+    color: var(--black);
+}
+
+a {
+    color: inherit;
+
+    &:hover {
+        color: var(--active);
+    }
+}
+
+.page-link {
+    color: var(--muted);
+    text-decoration: none;
+    margin: 0 1vw 2vw 0;
+
+    div {
+        display: flex;
+        margin: 0;
+    }
+
+    p {
+        margin: 0;
+        margin-right: calc(0.5vw * var(--scale-factor));
+    }
+}
+
+.card-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    margin-top: 5vw;
+    margin-bottom: 5vw;
+}
+
+.muted {
+    color: var(--muted);
+}
+
+.business-card {
+    display: flex;
+    background-color: white;
+    box-shadow: 10px 10px 20px 5px rgba(0, 0, 0, 0.25);
+    width: var(--page-width);
+    height: calc(var(--page-width) / 1.75);
+}
+
+.left-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40%;
+
+    img {
+        width: 75%;
+    }
+}
+
+.right-section {
+    text-align: left;
+    width: 60%;
+}
+
+.back-section {
+    width: var(--page-width);
+}
+
+.social-link {
+    text-decoration: none;
+    display: block;
+    margin-bottom: calc(1vw * var(--scale-factor));
+    width: fit-content;
+}
+
+.icon-text {
+    display: flex;
+    align-items: center;
+}
+
+.icon {
+    width: calc(2.5vw * var(--scale-factor));
+    height: calc(2.5vw * var(--scale-factor));
+}
+
+.icon-text p {
+    font-size: calc(2.2vw * var(--scale-factor));
+    margin: 0;
+    margin-left: calc(1vw * var(--scale-factor));
+}
+
+.project {
+    display: flex;
+    align-items: baseline;
+    border-bottom: 1px solid var(--ui);
+
+    .project-date {
+        width: calc(10vw * var(--scale-factor));
+        color: var(--muted);
+    }
+
+    .title-description {
+        width: calc(var(--page-width) - (10vw * var(--scale-factor)));
+        margin-top: 10px;
+        margin-bottom: 10px;
+        margin-right: 10px;
+
+        .project-title {
+            margin: 0;
+            margin-bottom: 5px;
+        }
+
+        .project-description {
+            margin: 0;
+            color: var(--muted);
+        }
+    }
+}
+
+#name {
+    font-size: calc(4vw * var(--scale-factor));
+    color: var(--black);
+    margin: 1vw 1vw 0 0;
+    font-weight: 700;
+    display: block;
+}
+
+#job-title {
+    font-size: calc(2.2vw * var(--scale-factor));
+    color: var(--muted);
+    margin: 0;
+    margin-right: calc(1vw * var(--scale-factor));
+    margin-bottom: calc(3vw * var(--scale-factor));
+    font-weight: 400;
+    display: block;
+}
+
+#about-me-link {
+    p {
+        font-size: calc(2.2vw * var(--scale-factor));
+    }
+
+    div {
+        margin-top: calc(3vw * var(--scale-factor));
+    }
+}

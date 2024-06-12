@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{%- include head.html -%}
+
+<body>
+    <div class="card-container">
+        <div id="business-card" class="business-card">
+            <div class="left-section">
+                <img src="{{ "/assets/images/me.png" | relative_url }}" alt="{{ site.name }}" />
+            </div>
+            <div class="right-section">
+                <span id="name">{{ site.name }}</span>
+                <span id="job-title">{{ site.job-title }}</span>
+                <a href="https://github.com/{{ site.github }}" class="social-link">
+                    <div class="icon-text">
+                        <img src="{{ "/assets/images/github.svg" | relative_url }}" alt="GitHub icon" class="icon" />
+                        <p>@{{ site.github }}</p>
+                    </div>
+                </a>
+                <a href="https://www.linkedin.com/in/{{ site.linkedin }}/" class="social-link">
+                    <div class="icon-text">
+                        <img src="{{ "/assets/images/linkedin.svg" | relative_url }}" alt="LinkedIn icon" class="icon" />
+                        <p>/{{ site.linkedin }} </p>
+                    </div>
+                </a>
+                <a href="mailto: {{ site.email }}" class="social-link">
+                    <div class="icon-text">
+                        <img src="{{ "/assets/images/email.svg" | relative_url }}" alt="Email icon" class="icon" />
+                        <p>{{ site.email }}</p>
+                    </div>
+                </a>
+                <a class="page-link" href="/about" id="about-me-link" >
+                    <div>
+                        <p>&#8594</p>
+                        <p style="text-decoration: underline;">About me</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

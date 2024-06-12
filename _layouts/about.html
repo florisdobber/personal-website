@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{%- include head.html -%}
+
+<body>
+    <div class="container">
+        <div class="back-section">
+            <a class="page-link" href="/">
+                <div>
+                    <p>&#8592</p>
+                    <p style="text-decoration: underline;">Less about me</p>
+                </div>
+            </a>
+            <h1>About me</h1>
+            {{ page.content | markdownify }}
+            <h1>Projects</h1>
+            {% assign projects = site.projects | sort: "start" | reverse %}
+            {% for project in projects %}
+            <div class="project">
+                <p class="project-date">
+                    {{ project.start }} {% if project.end %} &#8211 {{ project.end }} {% endif %}
+                </p>
+                <div class="title-description">
+                    <p class="project-title">
+                        <a href="{{ project.url }}">{{ project.title }}</a>
+                    </p>
+                    <p class="project-description">{{ project.description }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+
+</html>
