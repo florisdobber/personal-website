@@ -7,6 +7,6 @@ link: https://www.raycast.com/florisdobber/claude
 repo: https://github.com/florisdobber/claude-raycast
 ---
 
-[Claude]({{ page.link }}) is a [Raycast](https://www.raycast.com) extension, allowing users to interact with Anthropic's Claude API directly from Raycast. It gives users the ability to have an AI assisteat available without leaving their current application. 
+[Claude]({{ page.link }}) is a [Raycast](https://www.raycast.com) extension, allowing users to interact with Anthropic's Claude API directly from Raycast. It gives users the ability to have an AI assistant available without leaving their current application. 
 
 The code is available [here]({{ page.repo }}).

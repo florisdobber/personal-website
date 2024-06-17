@@ -14,4 +14,4 @@ I served as the president of [Code4Community]({{ page.link }}), an organization 
 - A library and book tracking system to help [Hands Across the Sea](https://handsacrossthesea.org) improve literacy rates in the Eastern Caribbean 
 - A recommendation letter system used by [JPAL](https://www.povertyactionlab.org) to provide letters of recommendation to at-risk youth in NYC and beyond
 
-The combined user base of these products was over 100,000 people, and the amout of people impacted by them was multiple times that. The organization has thrived since I graduated, maintaining the products mentioned above, as well as creating [additional products](https://www.c4cneu.com/projects) to help more organizations across Boston and beyond.
+The combined user base of these products was over 100,000 people, and the amount of people impacted by them was multiple times that. The organization has thrived since I graduated, maintaining the products mentioned above, as well as creating [additional products](https://www.c4cneu.com/projects) to help more organizations across Boston and beyond.
