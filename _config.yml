@@ -6,10 +6,6 @@ description: >-
 author: "Floris Dobber"
 
 permalink: pretty
-collections:
-  projects:
-    output: true
-    
 
 name: "Floris Dobber"
 job-title: "Software Engineer @ Meta"

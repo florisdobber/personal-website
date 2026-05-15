@@ -4,41 +4,203 @@
 {%- include head.html -%}
 
 <body>
-    <div class="card-container">
-        <div id="business-card" class="business-card">
-            <div class="left-section">
-                <img src="{{ "/assets/images/me.webp" | relative_url }}" alt="{{ site.name }}" />
-            </div>
-            <div class="right-section">
-                <span id="name">{{ site.name }}</span>
-                <span id="job-title">{{ site.job-title }}</span>
-                <a href="https://github.com/{{ site.github }}" class="social-link">
-                    <div class="icon-text">
-                        <img src="{{ "/assets/images/github.svg" | relative_url }}" alt="GitHub icon" class="icon" />
-                        <p>@{{ site.github }}</p>
+    <main class="stage">
+        <div class="scene">
+            <div class="shadow" aria-hidden="true"></div>
+            <div class="card" id="card">
+                <div class="face face-front">
+                    <div class="card-inner front-inner">
+                        <div class="portrait">
+                            <img src="{{ "/assets/images/me.webp" | relative_url }}" alt="{{ site.name }}" draggable="false" />
+                        </div>
+                        <div class="details">
+                            <h1 class="name">{{ site.name }}</h1>
+                            <p class="role">{{ site.job-title }}</p>
+                            <ul class="links">
+                                <li>
+                                    <a href="https://github.com/{{ site.github }}" rel="noopener">
+                                        <img src="{{ "/assets/images/github.svg" | relative_url }}" alt="" draggable="false" />
+                                        <span>@{{ site.github }}</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://www.linkedin.com/in/{{ site.linkedin }}/" rel="noopener">
+                                        <img src="{{ "/assets/images/linkedin.svg" | relative_url }}" alt="" draggable="false" />
+                                        <span>/{{ site.linkedin }}</span>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="mailto:{{ site.email }}">
+                                        <img src="{{ "/assets/images/email.svg" | relative_url }}" alt="" draggable="false" />
+                                        <span>{{ site.email }}</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
-                </a>
-                <a href="https://www.linkedin.com/in/{{ site.linkedin }}/" class="social-link">
-                    <div class="icon-text">
-                        <img src="{{ "/assets/images/linkedin.svg" | relative_url }}" alt="LinkedIn icon" class="icon" />
-                        <p>/{{ site.linkedin }} </p>
+                </div>
+                <div class="face face-back">
+                    <div class="card-inner back-inner">
+                        <p class="back-label">Selected work</p>
+                        <ul class="projects">
+                            <li><span class="year">2024</span><span class="proj">Claude Raycast Extension</span></li>
+                            <li><span class="year">2023</span><span class="proj">MCD Capital &middot; Automated trading</span></li>
+                            <li><span class="year">2023</span><span class="proj">MCFC &times; Hays &middot; OptiSub</span></li>
+                            <li><span class="year">'19&ndash;'22</span><span class="proj">Code4Community</span></li>
+                        </ul>
+                        <p class="back-mark">FD</p>
                     </div>
-                </a>
-                <a href="mailto: {{ site.email }}" class="social-link">
-                    <div class="icon-text">
-                        <img src="{{ "/assets/images/email.svg" | relative_url }}" alt="Email icon" class="icon" />
-                        <p>{{ site.email }}</p>
-                    </div>
-                </a>
-                <a class="page-link" href="/about" id="about-me-link" >
-                    <div>
-                        <p>&#8594</p>
-                        <p style="text-decoration: underline;">About me</p>
-                    </div>
-                </a>
+                </div>
+                <div class="face face-top"></div>
+                <div class="face face-bottom"></div>
+                <div class="face face-left"></div>
+                <div class="face face-right"></div>
             </div>
         </div>
-    </div>
+        <p class="hint" id="hint">drag to spin</p>
+    </main>
+
+    <script>
+        (function () {
+            const card = document.getElementById('card');
+            const hint = document.getElementById('hint');
+            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            let rotX = -12;
+            let rotY = 22;
+            let velX = 0;
+            let velY = 0;
+
+            let isPointerDown = false;
+            let dragged = false;
+            let pointerId = null;
+            let startX = 0, startY = 0;
+            let lastX = 0, lastY = 0, lastT = 0;
+
+            let idleResumeAt = reduceMotion ? Infinity : performance.now() + 600;
+            let interacted = false;
+
+            const DRAG_THRESHOLD = 5;
+            const SENSITIVITY = 0.45;
+            const FRICTION = 0.94;
+            const IDLE_SPIN = 0.10;
+            const IDLE_RESUME_DELAY = 6000;
+
+            function applyTransform() {
+                card.style.transform = 'rotateX(' + rotX.toFixed(3) + 'deg) rotateY(' + rotY.toFixed(3) + 'deg)';
+            }
+
+            applyTransform();
+
+            function onDown(e) {
+                if (e.button !== undefined && e.button !== 0) return;
+                isPointerDown = true;
+                dragged = false;
+                pointerId = e.pointerId;
+                startX = lastX = e.clientX;
+                startY = lastY = e.clientY;
+                lastT = performance.now();
+                velX = 0;
+                velY = 0;
+            }
+
+            function onMove(e) {
+                if (!isPointerDown || e.pointerId !== pointerId) return;
+
+                const totalDX = e.clientX - startX;
+                const totalDY = e.clientY - startY;
+
+                if (!dragged && Math.hypot(totalDX, totalDY) > DRAG_THRESHOLD) {
+                    dragged = true;
+                    card.classList.add('dragging');
+                    try { card.setPointerCapture(pointerId); } catch (err) { /* noop */ }
+                    if (!interacted) {
+                        interacted = true;
+                        hint && hint.classList.add('hidden');
+                    }
+                }
+
+                if (dragged) {
+                    const now = performance.now();
+                    const dt = Math.max(8, now - lastT);
+                    const dx = e.clientX - lastX;
+                    const dy = e.clientY - lastY;
+
+                    rotY += dx * SENSITIVITY;
+                    rotX -= dy * SENSITIVITY;
+
+                    velY = (dx * SENSITIVITY) / dt;
+                    velX = -(dy * SENSITIVITY) / dt;
+
+                    lastX = e.clientX;
+                    lastY = e.clientY;
+                    lastT = now;
+
+                    applyTransform();
+                    e.preventDefault();
+                }
+            }
+
+            function onUp(e) {
+                if (!isPointerDown) return;
+                isPointerDown = false;
+                card.classList.remove('dragging');
+                if (pointerId !== null) {
+                    try { card.releasePointerCapture(pointerId); } catch (err) { /* noop */ }
+                }
+                pointerId = null;
+                idleResumeAt = reduceMotion ? Infinity : performance.now() + IDLE_RESUME_DELAY;
+            }
+
+            card.addEventListener('pointerdown', onDown);
+            card.addEventListener('pointermove', onMove);
+            card.addEventListener('pointerup', onUp);
+            card.addEventListener('pointercancel', onUp);
+
+            card.addEventListener('click', function (e) {
+                if (dragged) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, true);
+
+            card.addEventListener('dragstart', function (e) { e.preventDefault(); });
+
+            let lastFrame = performance.now();
+            function loop(now) {
+                const frameDt = Math.min(50, now - lastFrame);
+                lastFrame = now;
+
+                if (!isPointerDown) {
+                    const speed = Math.hypot(velX, velY);
+                    if (speed > 0.0008) {
+                        rotX += velX * frameDt;
+                        rotY += velY * frameDt;
+                        const decay = Math.pow(FRICTION, frameDt / 16);
+                        velX *= decay;
+                        velY *= decay;
+                        applyTransform();
+                    } else if (now > idleResumeAt) {
+                        rotY += IDLE_SPIN * (frameDt / 16);
+                        const phase = (now - idleResumeAt) / 1800;
+                        rotX += Math.sin(phase) * 0.018 * (frameDt / 16);
+                        applyTransform();
+                    }
+                }
+                requestAnimationFrame(loop);
+            }
+
+            requestAnimationFrame(loop);
+
+            window.addEventListener('blur', function () {
+                if (isPointerDown) {
+                    isPointerDown = false;
+                    card.classList.remove('dragging');
+                    pointerId = null;
+                }
+            });
+        })();
+    </script>
 </body>
 
 </html>
