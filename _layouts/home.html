@@ -10,12 +10,18 @@
             <div class="card" id="card">
                 <div class="face face-front">
                     <div class="card-inner front-inner">
-                        <div class="portrait">
-                            <img src="{{ "/assets/images/me.webp" | relative_url }}" alt="{{ site.name }}" draggable="false" />
-                        </div>
+                        <span class="monogram" aria-hidden="true">fd.</span>
                         <div class="details">
                             <h1 class="name">{{ site.name }}</h1>
                             <p class="role">{{ site.job-title }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="face face-back">
+                    <div class="card-inner back-inner">
+                        <span class="monogram monogram-back" aria-hidden="true">fd.</span>
+                        <div class="back-content">
+                            <p class="back-label">You found the back.</p>
                             <ul class="links">
                                 <li>
                                     <a href="https://github.com/{{ site.github }}" rel="noopener">
@@ -35,20 +41,14 @@
                                         <span>{{ site.email }}</span>
                                     </a>
                                 </li>
+                                <li>
+                                    <a href="https://florisdobber.com" rel="noopener">
+                                        <img src="{{ "/assets/images/website.svg" | relative_url }}" alt="" draggable="false" />
+                                        <span>florisdobber.com</span>
+                                    </a>
+                                </li>
                             </ul>
                         </div>
-                    </div>
-                </div>
-                <div class="face face-back">
-                    <div class="card-inner back-inner">
-                        <p class="back-label">Selected work</p>
-                        <ul class="projects">
-                            <li><span class="year">2024</span><span class="proj">Claude Raycast Extension</span></li>
-                            <li><span class="year">2023</span><span class="proj">MCD Capital &middot; Automated trading</span></li>
-                            <li><span class="year">2023</span><span class="proj">MCFC &times; Hays &middot; OptiSub</span></li>
-                            <li><span class="year">'19&ndash;'22</span><span class="proj">Code4Community</span></li>
-                        </ul>
-                        <p class="back-mark">FD</p>
                     </div>
                 </div>
                 <div class="face face-top"></div>
@@ -64,12 +64,9 @@
             const card = document.getElementById('card');
             const shadow = document.querySelector('.shadow');
 
-            // baseX/Y is the rotation set by drag (and decaying inertia). The displayed
-            // rotation is base + parallax offset; parallax tilts within ±a few degrees on
-            // top of whatever the user has dragged to, without snapping it back.
+            // baseX/Y is the rotation set by drag (and decaying inertia). The card
+            // stays wherever the user lands it after a drag.
             let baseX = 0, baseY = 0;
-            let pxlX = 0, pxlY = 0;
-            let targetPxlX = 0, targetPxlY = 0;
             let velX = 0, velY = 0;
 
             let isPointerDown = false;
@@ -81,8 +78,6 @@
             const DRAG_THRESHOLD = 5;
             const SENSITIVITY = 0.45;
             const FRICTION = 0.94;
-            const PARALLAX_RX = 2.0;       // max ° tilt on X axis from pointer position
-            const PARALLAX_RY = 3.5;       // max ° tilt on Y axis from pointer position
 
             // One-time settling wobble on load. Decaying sine on yaw (Y) plus a
             // smaller pitch (X) at a slightly different frequency so peaks don't
@@ -99,8 +94,8 @@
             let introStart = null;
 
             function applyTransform() {
-                const rotX = baseX + pxlX;
-                const rotY = baseY + pxlY;
+                const rotX = baseX;
+                const rotY = baseY;
                 card.style.transform =
                     'rotateX(' + rotX.toFixed(3) + 'deg) ' +
                     'rotateY(' + rotY.toFixed(3) + 'deg)';
@@ -193,18 +188,6 @@
 
             card.addEventListener('dragstart', function (e) { e.preventDefault(); });
 
-            // Pointer-follow parallax: the card subtly tilts a few degrees toward the
-            // cursor — but as an offset on top of whatever the user has dragged to,
-            // not a replacement.
-            window.addEventListener('pointermove', function (e) {
-                if (e.pointerType === 'touch') return;
-                if (isPointerDown) return;
-                const dx = (e.clientX / window.innerWidth)  - 0.5;
-                const dy = (e.clientY / window.innerHeight) - 0.5;
-                targetPxlY =  dx * 2 * PARALLAX_RY;
-                targetPxlX = -dy * 2 * PARALLAX_RX;
-            });
-
             let lastFrame = performance.now();
             function loop(now) {
                 const frameDt = Math.min(50, now - lastFrame);
@@ -239,16 +222,6 @@
                         velY *= decay;
                         needsUpdate = true;
                     }
-                }
-
-                // Parallax always lerps — independent of base, runs even during drag/inertia.
-                const dPX = targetPxlX - pxlX;
-                const dPY = targetPxlY - pxlY;
-                if (Math.abs(dPX) > 0.005 || Math.abs(dPY) > 0.005) {
-                    const lerp = 1 - Math.pow(0.88, frameDt / 16);
-                    pxlX += dPX * lerp;
-                    pxlY += dPY * lerp;
-                    needsUpdate = true;
                 }
 
                 if (needsUpdate) applyTransform();

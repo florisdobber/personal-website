@@ -69,40 +69,39 @@ Key rules — every single one of these came out of a bug:
 - **`opacity: var(--shadow-vis)` where `--shadow-vis = |cos(rotX) · cos(rotY)|`**. This is the projected silhouette area. When the card is edge-on it has almost no vertical projection, so the shadow correctly fades to nothing.
 - **`--shadow-dx` / `--shadow-dy`** shift the shadow opposite to the card's tilt, suggesting the card pivoting above a surface.
 
-### Rotation model — base + parallax offset
+### Rotation model
 
-Two independent inputs drive the displayed rotation:
+The displayed rotation is just `baseX, baseY` — set by the user's drag and the decaying inertia after release. The card stays exactly where the user lands it.
 
-```
-displayed rotation = baseX + pxlX, baseY + pxlY
-```
-
-- **`baseX, baseY`** — set by the user's drag (and the decaying inertia after release). This is "where the user spun the card to."
-- **`pxlX, pxlY`** — parallax offset driven by cursor position over the page. Lerps toward `targetPxlX/Y` (set by `pointermove` on window). Capped to roughly ±2–3°.
-
-This split is **the** key to the interaction feel. Earlier iterations had a single `rotX/rotY` plus a parallax target — which made the card snap back to face-on after a drag because parallax kept pulling it toward the cursor-derived target. With base + offset, the base stays put after a drag, and parallax just adds a gentle ±2–3° tilt on top.
+An earlier iteration added a pointer-follow parallax offset on top of base (the card tilted a few degrees toward the cursor). It was removed because the constant subtle re-tilt shifted the perspective-projected position of links by fractions of a pixel under the cursor — enough to drop hover state mid-hover and make the underline animation flicker. The interaction now feels more solid in exchange for the slight loss of liveliness.
 
 Animation loop per frame:
 
 1. If inertia speed > threshold, decay velocity into `baseX/Y`.
-2. Always lerp `pxlX/Y` toward `targetPxlX/Y`.
-3. Call `applyTransform` if anything changed.
+2. Call `applyTransform` if anything changed.
 
-`applyTransform` writes `rotateX(baseX + pxlX) rotateY(baseY + pxlY)` to the card, plus the shadow CSS variables.
+`applyTransform` writes `rotateX(baseX) rotateY(baseY)` to the card, plus the shadow CSS variables.
 
 ### Drag interaction
 
 - **5px drag threshold** before a pointerdown becomes a drag. Below that, the gesture is treated as a click on whichever link was under the cursor.
 - `setPointerCapture` is only called *after* crossing the threshold, so small movements don't steal the click target.
 - A `capture: true` click handler on the card calls `preventDefault` if `dragged === true`, so a drag never accidentally opens a link.
-- Pointer events handle both mouse and touch with one code path. Parallax and hover effects gate on `e.pointerType !== 'touch'`.
+- Pointer events handle both mouse and touch with one code path.
 
 ### Colors
 
-- Card front: **`#FFFFFF`** (pure white).
-- Card back: **`#FCFCFA`** — just off-white, enough to differentiate when flipped.
-- Page background: **`#FFFCF0`** — the "paper" tone from Flexoki. Slightly warm cream so the white card stands against it.
-- Edges: `#E8E2CE` (top), `#D6CDB0` (bottom), `#DED7BE` (sides) — muted creams. Static, no lighting overlay.
+Warm Flexoki-inspired palette. The page is slightly darker than the card so the card reads as a physical object on a lit tabletop.
+
+- Card front and back: **`#FFFCF0`** — same warm cream both sides. The back is discovered by flipping, not by a color cue.
+- Page background: radial gradient `#FFFCF0` → `#F2F0E5` → `#E6E4D9`, lit-from-center. Subtle, not decorative.
+- Card border: `1px solid rgba(16, 15, 15, 0.06)` — barely visible, enough to define the edge against the page.
+- Edges: `#EFEAD6` (top), `#D9D2BC` (bottom), `#E4DEC8` (sides) — muted creams just darker than the front, reading as paper thickness. Static, no lighting overlay.
+
+### Content & layout
+
+- **Front:** identity-focused. Small `fd.` monogram (IBM Plex Serif) in the **top-right**; large, tight Inter name; muted role beneath. The name + role block is left-aligned but indented well right of the card's left padding so the right half of the card carries the weight. No portrait, no contact links — those are intentionally on the back.
+- **Back:** two-column flex. Large `fd.` monogram in the **bottom-left** (diagonal mirror of the front's monogram). Right column: "You found the back." muted label at the top, then four contact rows (GitHub, LinkedIn, Email, Website) with icons. The back is a reward for discovering the flip interaction; the front never advertises it.
 
 ### Removed effects — and why
 
@@ -114,13 +113,14 @@ The card looked very different a few iterations ago. These were intentionally re
 - **Paper grain (SVG turbulence overlay).** Read as "I applied an effect" rather than as physical paper.
 - **Specular highlight.** A radial gradient on the face whose cutoff was perceived as a triangular shape during rotation.
 - **Per-face Lambert lighting overlay.** Added a subtle dark wash whose gradient was also perceived as triangular at oblique angles.
+- **Pointer-follow parallax** (a ±2–3° tilt toward the cursor on top of the base rotation). It shifted the perspective-projected position of links by fractions of a pixel under the cursor, breaking hover state and making the underline flicker. The interaction feels more solid without it.
 
 If any of these come back, the bar to clear is: it must read as *the card being physical*, not as *an effect on the card*. Anything that's visible-as-an-effect breaks the minimalist intent.
 
 ### Micro-interactions kept
 
 - **Drag to spin**, with momentum/inertia decay.
-- **Pointer-follow parallax** (mouse only).
+- **One-time settling wobble** on load (decaying sine on yaw + a smaller pitch at a different frequency; cancels on first pointerdown).
 - **Link underline** animates left-to-right on hover. Pure CSS.
 - **Dynamic shadow** that follows the card's tilt and fades when the card is edge-on.
 
@@ -129,7 +129,7 @@ If any of these come back, the bar to clear is: it must read as *the card being 
 - `_layouts/home.html` — single-page layout, markup, inline interaction JS.
 - `_layouts/project.html` — *removed* (no longer used; projects collection deleted).
 - `_layouts/about.html` — *removed*.
-- `_projects/` — *removed*; the four selected-work entries are hardcoded on the card back.
+- `_projects/` — *removed*; back now holds contact links instead of selected work.
 - `assets/css/main.css` — all styles. No SCSS, no partials, no preprocessor magic.
 - `_config.yml` — `name`, `job-title`, `github`, `linkedin`, `email`. Editing here drives the card content.
 
