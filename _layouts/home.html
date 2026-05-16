@@ -57,19 +57,20 @@
                 <div class="face face-right"></div>
             </div>
         </div>
-        <p class="hint" id="hint">drag to spin</p>
     </main>
 
     <script>
         (function () {
             const card = document.getElementById('card');
-            const hint = document.getElementById('hint');
-            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const shadow = document.querySelector('.shadow');
 
-            let rotX = -12;
-            let rotY = 22;
-            let velX = 0;
-            let velY = 0;
+            // baseX/Y is the rotation set by drag (and decaying inertia). The displayed
+            // rotation is base + parallax offset; parallax tilts within ±a few degrees on
+            // top of whatever the user has dragged to, without snapping it back.
+            let baseX = 0, baseY = 0;
+            let pxlX = 0, pxlY = 0;
+            let targetPxlX = 0, targetPxlY = 0;
+            let velX = 0, velY = 0;
 
             let isPointerDown = false;
             let dragged = false;
@@ -77,17 +78,33 @@
             let startX = 0, startY = 0;
             let lastX = 0, lastY = 0, lastT = 0;
 
-            let idleResumeAt = reduceMotion ? Infinity : performance.now() + 600;
-            let interacted = false;
-
             const DRAG_THRESHOLD = 5;
             const SENSITIVITY = 0.45;
             const FRICTION = 0.94;
-            const IDLE_SPIN = 0.10;
-            const IDLE_RESUME_DELAY = 6000;
+            const PARALLAX_RX = 2.0;       // max ° tilt on X axis from pointer position
+            const PARALLAX_RY = 3.5;       // max ° tilt on Y axis from pointer position
 
             function applyTransform() {
-                card.style.transform = 'rotateX(' + rotX.toFixed(3) + 'deg) rotateY(' + rotY.toFixed(3) + 'deg)';
+                const rotX = baseX + pxlX;
+                const rotY = baseY + pxlY;
+                card.style.transform =
+                    'rotateX(' + rotX.toFixed(3) + 'deg) ' +
+                    'rotateY(' + rotY.toFixed(3) + 'deg)';
+
+                if (shadow) {
+                    const X = rotX * Math.PI / 180;
+                    const Y = rotY * Math.PI / 180;
+                    const sX = Math.sin(X), cX = Math.cos(X);
+                    const sY = Math.sin(Y), cY = Math.cos(Y);
+                    const tilt = Math.max(Math.abs(sX), Math.abs(sY));
+                    // Visible shadow scales with the card's projected silhouette —
+                    // when edge-on its profile is essentially zero.
+                    const vis = Math.abs(cX * cY);
+                    shadow.style.setProperty('--shadow-dx', (-sY * 22).toFixed(1) + 'px');
+                    shadow.style.setProperty('--shadow-dy', (sX * 18).toFixed(1) + 'px');
+                    shadow.style.setProperty('--shadow-spread', (tilt * 14).toFixed(1) + 'px');
+                    shadow.style.setProperty('--shadow-vis', vis.toFixed(3));
+                }
             }
 
             applyTransform();
@@ -114,10 +131,6 @@
                     dragged = true;
                     card.classList.add('dragging');
                     try { card.setPointerCapture(pointerId); } catch (err) { /* noop */ }
-                    if (!interacted) {
-                        interacted = true;
-                        hint && hint.classList.add('hidden');
-                    }
                 }
 
                 if (dragged) {
@@ -126,8 +139,8 @@
                     const dx = e.clientX - lastX;
                     const dy = e.clientY - lastY;
 
-                    rotY += dx * SENSITIVITY;
-                    rotX -= dy * SENSITIVITY;
+                    baseY += dx * SENSITIVITY;
+                    baseX -= dy * SENSITIVITY;
 
                     velY = (dx * SENSITIVITY) / dt;
                     velX = -(dy * SENSITIVITY) / dt;
@@ -149,7 +162,6 @@
                     try { card.releasePointerCapture(pointerId); } catch (err) { /* noop */ }
                 }
                 pointerId = null;
-                idleResumeAt = reduceMotion ? Infinity : performance.now() + IDLE_RESUME_DELAY;
             }
 
             card.addEventListener('pointerdown', onDown);
@@ -166,27 +178,49 @@
 
             card.addEventListener('dragstart', function (e) { e.preventDefault(); });
 
+            // Pointer-follow parallax: the card subtly tilts a few degrees toward the
+            // cursor — but as an offset on top of whatever the user has dragged to,
+            // not a replacement.
+            window.addEventListener('pointermove', function (e) {
+                if (e.pointerType === 'touch') return;
+                if (isPointerDown) return;
+                const dx = (e.clientX / window.innerWidth)  - 0.5;
+                const dy = (e.clientY / window.innerHeight) - 0.5;
+                targetPxlY =  dx * 2 * PARALLAX_RY;
+                targetPxlX = -dy * 2 * PARALLAX_RX;
+            });
+
             let lastFrame = performance.now();
             function loop(now) {
                 const frameDt = Math.min(50, now - lastFrame);
                 lastFrame = now;
 
+                let needsUpdate = false;
+
                 if (!isPointerDown) {
                     const speed = Math.hypot(velX, velY);
                     if (speed > 0.0008) {
-                        rotX += velX * frameDt;
-                        rotY += velY * frameDt;
+                        // Inertia decays on the base rotation, leaving the card wherever it lands.
+                        baseX += velX * frameDt;
+                        baseY += velY * frameDt;
                         const decay = Math.pow(FRICTION, frameDt / 16);
                         velX *= decay;
                         velY *= decay;
-                        applyTransform();
-                    } else if (now > idleResumeAt) {
-                        rotY += IDLE_SPIN * (frameDt / 16);
-                        const phase = (now - idleResumeAt) / 1800;
-                        rotX += Math.sin(phase) * 0.018 * (frameDt / 16);
-                        applyTransform();
+                        needsUpdate = true;
                     }
                 }
+
+                // Parallax always lerps — independent of base, runs even during drag/inertia.
+                const dPX = targetPxlX - pxlX;
+                const dPY = targetPxlY - pxlY;
+                if (Math.abs(dPX) > 0.005 || Math.abs(dPY) > 0.005) {
+                    const lerp = 1 - Math.pow(0.88, frameDt / 16);
+                    pxlX += dPX * lerp;
+                    pxlY += dPY * lerp;
+                    needsUpdate = true;
+                }
+
+                if (needsUpdate) applyTransform();
                 requestAnimationFrame(loop);
             }
 

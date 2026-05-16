@@ -18,7 +18,7 @@
     --card-t: calc(var(--card-w) * 0.008);
     --card-pad: calc(var(--card-w) * 0.05);
 
-    background: var(--bg-2);
+    background: #FFFCF0;
     color: var(--ink);
 }
 
@@ -51,8 +51,7 @@ body {
     justify-content: center;
     perspective: 1600px;
     perspective-origin: 50% 45%;
-    background:
-        radial-gradient(ellipse at 50% 35%, #FBF7E6 0%, var(--bg-2) 55%, #E9E5D3 100%);
+    background: #FFFCF0;
     overflow: hidden;
     user-select: none;
     -webkit-user-select: none;
@@ -68,14 +67,25 @@ body {
 .shadow {
     position: absolute;
     left: 50%;
-    top: calc(100% + var(--card-w) * 0.06);
-    width: calc(var(--card-w) * 0.95);
-    height: calc(var(--card-w) * 0.18);
-    transform: translateX(-50%);
-    background: radial-gradient(ellipse at center, rgba(40, 32, 16, 0.32) 0%, rgba(40, 32, 16, 0.12) 40%, transparent 70%);
-    filter: blur(14px);
+    top: 50%;
+    width: calc(var(--card-w) * 1.22);
+    height: calc(var(--card-h) * 1.22);
+    /* Pushed well behind the card so the card's edge never goes deeper than the
+       shadow when rotated (the card's deepest edge at 90° is at z = -card-w/2). */
+    transform: translate3d(
+        calc(-50% + var(--shadow-dx, 0px)),
+        calc(-50% + 18px + var(--shadow-dy, 0px)),
+        -320px);
+    background: radial-gradient(ellipse 65% 60% at 50% 50%,
+        rgba(30, 25, 15, 0.42) 0%,
+        rgba(30, 25, 15, 0.22) 45%,
+        rgba(30, 25, 15, 0.06) 78%,
+        transparent 100%);
+    filter: blur(calc(18px + var(--shadow-spread, 0px)));
+    opacity: var(--shadow-vis, 1);
     pointer-events: none;
     z-index: 0;
+    border-radius: 4px;
 }
 
 .card {
@@ -100,8 +110,6 @@ body {
     left: 50%;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    box-shadow:
-        inset 0 0 0 1px rgba(0, 0, 0, 0.04);
 }
 
 .face-front,
@@ -116,45 +124,52 @@ body {
 .face-bottom {
     width: var(--card-w);
     height: var(--card-t);
+    overflow: hidden;
 }
 
 .face-left,
 .face-right {
     width: var(--card-t);
     height: var(--card-h);
+    overflow: hidden;
 }
 
 .face-front {
     transform: translate(-50%, -50%) translateZ(calc(var(--card-t) / 2));
-    background:
-        linear-gradient(135deg, #FFFFFF 0%, #FBF8EB 100%);
+    background: #FFFFFF;
 }
 
 .face-back {
     transform: translate(-50%, -50%) rotateY(180deg) translateZ(calc(var(--card-t) / 2));
-    background:
-        linear-gradient(135deg, #FBF8EB 0%, #F0EBD5 100%);
+    background: #FCFCFA;
+}
+
+.face-front .card-inner,
+.face-back .card-inner {
+    position: relative;
+    z-index: 2;
 }
 
 .face-top {
     transform: translate(-50%, -50%) rotateX(-90deg) translateZ(calc(var(--card-h) / 2));
-    background: linear-gradient(to bottom, #EFE9D2, var(--edge));
+    background: #E8E2CE;
 }
 
 .face-bottom {
     transform: translate(-50%, -50%) rotateX(90deg) translateZ(calc(var(--card-h) / 2));
-    background: linear-gradient(to top, var(--edge-shadow), var(--edge));
+    background: #D6CDB0;
 }
 
 .face-right {
     transform: translate(-50%, -50%) rotateY(90deg) translateZ(calc(var(--card-w) / 2));
-    background: linear-gradient(to left, var(--edge-shadow), var(--edge));
+    background: #DED7BE;
 }
 
 .face-left {
     transform: translate(-50%, -50%) rotateY(-90deg) translateZ(calc(var(--card-w) / 2));
-    background: linear-gradient(to right, #EFE9D2, var(--edge));
+    background: #DED7BE;
 }
+
 
 .card-inner {
     width: 100%;
@@ -226,11 +241,32 @@ body {
     text-decoration: none;
     font-size: calc(var(--card-w) * 0.034);
     line-height: 1.2;
-    transition: color 0.15s ease;
+    transition: color 0.2s ease;
+}
+
+.links a > span {
+    position: relative;
+}
+
+.links a > span::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+    height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    transition: transform 0.28s ease;
 }
 
 .links a:hover {
     color: var(--active);
+}
+
+.links a:hover > span::after {
+    transform: scaleX(1);
 }
 
 .links img {
@@ -297,29 +333,6 @@ body {
     color: var(--faint);
     font-weight: 600;
     letter-spacing: 0.12em;
-}
-
-.hint {
-    position: absolute;
-    bottom: calc(var(--card-w) * 0.05);
-    left: 50%;
-    transform: translateX(-50%);
-    margin: 0;
-    font-size: 13px;
-    color: var(--faint);
-    letter-spacing: 0.04em;
-    pointer-events: none;
-    transition: opacity 0.5s ease;
-    animation: hint-fade 1.2s ease 0.4s both;
-}
-
-.hint.hidden {
-    opacity: 0;
-}
-
-@keyframes hint-fade {
-    from { opacity: 0; }
-    to { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
