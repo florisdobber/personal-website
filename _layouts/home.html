@@ -84,6 +84,20 @@
             const PARALLAX_RX = 2.0;       // max ° tilt on X axis from pointer position
             const PARALLAX_RY = 3.5;       // max ° tilt on Y axis from pointer position
 
+            // One-time settling wobble on load. Decaying sine on yaw (Y) plus a
+            // smaller pitch (X) at a slightly different frequency so peaks don't
+            // sync — keeps the motion reading as organic, not mechanical. Cancels
+            // on first pointerdown so it never fights user input.
+            const INTRO_DURATION_MS = 1300;
+            const INTRO_AMP_Y = 5.0;
+            const INTRO_AMP_X = 1.8;
+            const INTRO_FREQ_Y = 2.6;
+            const INTRO_FREQ_X = 3.1;
+            const INTRO_DECAY = 3.2;
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            let introActive = !prefersReducedMotion;
+            let introStart = null;
+
             function applyTransform() {
                 const rotX = baseX + pxlX;
                 const rotY = baseY + pxlY;
@@ -111,6 +125,7 @@
 
             function onDown(e) {
                 if (e.button !== undefined && e.button !== 0) return;
+                introActive = false;
                 isPointerDown = true;
                 dragged = false;
                 pointerId = e.pointerId;
@@ -196,6 +211,22 @@
                 lastFrame = now;
 
                 let needsUpdate = false;
+
+                if (introActive) {
+                    if (introStart === null) introStart = now;
+                    const t = (now - introStart) / 1000;
+                    if (t * 1000 >= INTRO_DURATION_MS) {
+                        introActive = false;
+                        baseX = 0;
+                        baseY = 0;
+                    } else {
+                        const env = Math.exp(-t * INTRO_DECAY);
+                        const TAU = Math.PI * 2;
+                        baseY = INTRO_AMP_Y * env * Math.sin(t * INTRO_FREQ_Y * TAU);
+                        baseX = INTRO_AMP_X * env * Math.sin(t * INTRO_FREQ_X * TAU);
+                    }
+                    needsUpdate = true;
+                }
 
                 if (!isPointerDown) {
                     const speed = Math.hypot(velX, velY);
