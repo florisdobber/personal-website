@@ -213,7 +213,7 @@ body {
     left: auto;
     align-self: flex-end;
     flex: 0 0 auto;
-    font-size: calc(var(--card-w) * 0.16);
+    font-size: calc(var(--card-w) * 0.11);
 }
 
 .details {
