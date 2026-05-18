@@ -4,7 +4,7 @@
     {
       "name": "jekyll",
       "runtimeExecutable": "bash",
-      "runtimeArgs": ["-c", "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 bundle exec jekyll serve --livereload --port 4000"],
+      "runtimeArgs": ["-c", "LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 bundle exec jekyll serve --livereload --host 0.0.0.0 --port 4000"],
       "port": 4000
     }
   ]
