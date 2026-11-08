@@ -1,324 +1,262 @@
+/* Floris Dobber: an interactive 3D business card on a linen-covered table.
+   Markup and interaction live in _layouts/home.html; everything visual lives here.
+   Design notes: README.md. */
+
+/* Flexoki, as on florisdobber.com */
 :root {
-    font-family: 'Inter', sans-serif;
-
-    --ink: #100F0F;
-    --muted: #6F6E69;
-    --faint: #B7B5AC;
-
-    --paper: #FFFCF0;
-    --bg-2: #F2F0E5;
-    --bg-3: #E6E4D9;
-
-    --edge-top:    #EFEAD6;
-    --edge-bottom: #D9D2BC;
-    --edge-side:   #E4DEC8;
-
-    --active: #24837B;
-
-    --card-w: min(86vw, 122.5vh, 520px);
-    --card-h: calc(var(--card-w) / 1.75);
-    --card-t: calc(var(--card-w) * 0.008);
-    --card-pad: calc(var(--card-w) * 0.07);
-
-    background: var(--bg-2);
-    color: var(--ink);
+  --ink: #100F0F;
+  --muted: #6F6E69;
+  --paper: #FFFCF0;
+  --bg-2: #F2F0E5;
+  --bg-3: #E6E4D9;
+  --edge: #E4DEC8;
+  --active: #24837B;
+  --radius: 3px;
 }
-
-@supports (font-variation-settings: normal) {
-    :root {
-        font-family: 'Inter var', sans-serif;
-    }
-}
-
-* {
-    box-sizing: border-box;
-}
-
-html,
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
 body {
-    margin: 0;
-    height: 100%;
-    overflow: hidden;
-    overscroll-behavior: none;
-    -webkit-font-smoothing: antialiased;
+  background: var(--table);
+  font-family: Inter, system-ui, -apple-system, sans-serif;
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+}
+/* ---------- The table ----------
+   Lit by the same lamp as the card: up and to the left, slightly in front. The pool of light
+   sits up-left and the surface falls off toward the lower right, where the shadows go. */
+body { --table: #E2DDCF; --pool: .78; --falloff: .09; }
+.table {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--table);
+  background-image: var(--tex-linen, none);
+  background-size: 300px 300px;
+}
+.table::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 85% 75% at 27% 15%,
+      rgb(255 252 240 / var(--pool)) 0%,
+      rgb(255 252 240 / calc(var(--pool) * .45)) 40%,
+      rgb(255 252 240 / 0) 72%),
+    linear-gradient(140deg, rgb(46 34 22 / 0) 35%, rgb(46 34 22 / var(--falloff)) 100%);
 }
 
+/* ---------- The stack: identical cards lying under the one you pick up ---------- */
+.stack-card {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  container-type: inline-size;
+  background-color: var(--paper);
+  background-image: linear-gradient(135deg, rgba(255,255,255,.4) 0%, rgba(255,255,255,0) 45%, rgba(60,45,30,.05) 100%);
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 1px rgba(16,15,15,.06),
+    .6px .9px 0 #D6CFB9,                      /* the card's own thickness */
+    1px 1.6px 2px rgba(46,34,22,.16),         /* contact */
+    calc(var(--k, 1) * 6px) calc(var(--k, 1) * 10px) calc(var(--k, 1) * 26px) calc(var(--k, 1) * -6px) rgba(46,34,22,.22);
+}
+.stack-card .paper { opacity: 1; }
+.stack-card .monogram, .stack-card .name, .stack-card .role { transition: none; }
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 64px;
+  padding: 24px;
+}
+
+/* The grab area: a fixed box the card lives in, so a fast-spinning or edge-on card is still easy to catch.
+   Real business-card aspect, 1.75 : 1, scaled as on florisdobber.com. */
 .stage {
-    position: relative;
-    width: 100%;
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    perspective: 1600px;
-    perspective-origin: 50% 45%;
-    background:
-        radial-gradient(circle at 50% 42%,
-            #FFFCF0 0%,
-            #F2F0E5 38%,
-            #E6E4D9 100%);
-    overflow: hidden;
-    user-select: none;
-    -webkit-user-select: none;
+  position: relative;
+  width: min(520px, 86vw, 122.5vh);
+  aspect-ratio: 1.75;
+  perspective: 1800px;
+  touch-action: none;
+  cursor: grab;
+  outline: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.stage.dragging { cursor: grabbing; }
+.stage:focus-visible::after {
+  content: "";
+  position: absolute;
+  inset: -16px;
+  border-radius: 14px;
+  outline: 2px solid var(--active);
 }
 
-.scene {
-    position: relative;
-    width: var(--card-w);
-    height: var(--card-h);
-    transform-style: preserve-3d;
-}
-
+/* Each shadow is a pre-blurred image drawn once by script (see shadowImage). Only its transform
+   and opacity change per frame, which every browser composites without repainting. A live
+   CSS filter: blur() on a moving element leaves smeared trails in Safari. */
 .shadow {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: calc(var(--card-w) * 1.22);
-    height: calc(var(--card-h) * 1.22);
-    /* Pushed well behind the card so the card's edge never goes deeper than the
-       shadow when rotated (the card's deepest edge at 90° is at z = -card-w/2). */
-    transform: translate3d(
-        calc(-50% + var(--shadow-dx, 0px)),
-        calc(-50% + 22px + var(--shadow-dy, 0px)),
-        -320px);
-    background: radial-gradient(ellipse 65% 60% at 50% 50%,
-        rgba(16, 15, 15, 0.34) 0%,
-        rgba(16, 15, 15, 0.18) 45%,
-        rgba(16, 15, 15, 0.05) 78%,
-        transparent 100%);
-    filter: blur(calc(22px + var(--shadow-spread, 0px)));
-    opacity: var(--shadow-vis, 1);
-    pointer-events: none;
-    z-index: 0;
-    border-radius: 4px;
+  position: absolute;
+  inset: 0;
+  background: no-repeat center / 100% 100%;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform, opacity;
 }
 
 .card {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transform-style: preserve-3d;
-    transform: rotateX(-12deg) rotateY(22deg);
-    cursor: grab;
-    touch-action: none;
-    will-change: transform;
-    z-index: 1;
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
 }
-
-.card.dragging {
-    cursor: grabbing;
+.layer {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
 }
+.slice { background: var(--edge); }
 
 .face {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+  container-type: inline-size;
+  background-color: var(--paper);
+  background-image: linear-gradient(135deg, rgba(255,255,255,.4) 0%, rgba(255,255,255,0) 45%, rgba(60,45,30,.05) 100%);
+  box-shadow: inset 0 0 0 1px rgba(16,15,15,.06), inset 0 0 0 2px rgba(255,255,255,.35);
 }
 
-.face-front,
-.face-back {
-    width: var(--card-w);
-    height: var(--card-h);
-    border-radius: 3px;
-    overflow: hidden;
-    border: 1px solid rgba(16, 15, 15, 0.06);
+/* Paper surface. Generated in the browser on load (see makePaper) and laid OVER the printed
+   content, so the ink picks up the paper's tooth the way ink on uncoated stock does.
+   "base" is soft cloudiness from fibre clumps and never changes. The four relief layers are the
+   fibres' slopes lit from +x, -x, +y and -y; each frame their opacities are set from where the
+   light is relative to the face, so the texture rakes up when the card tilts away from the
+   light and flattens out when it faces it, as real card stock does. */
+.paper {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-repeat: repeat;
+  background-size: var(--tile, 340px) var(--tile, 340px);
+  opacity: 0;
 }
+.paper.base { opacity: 1; }
+#back .paper { background-position: 131px 77px; }   /* so the two sides don't share a pattern */
 
-.face-top,
-.face-bottom {
-    width: var(--card-w);
-    height: var(--card-t);
-    overflow: hidden;
+.shade, .sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
 }
+.shade { background: #1C1610; }
 
-.face-left,
-.face-right {
-    width: var(--card-t);
-    height: var(--card-h);
-    overflow: hidden;
-}
-
-.face-front {
-    transform: translate(-50%, -50%) translateZ(calc(var(--card-t) / 2));
-    background: var(--paper);
-}
-
-.face-back {
-    transform: translate(-50%, -50%) rotateY(180deg) translateZ(calc(var(--card-t) / 2));
-    background: var(--paper);
-}
-
-.face-front .card-inner,
-.face-back .card-inner {
-    position: relative;
-    z-index: 2;
-}
-
-.face-top {
-    transform: translate(-50%, -50%) rotateX(-90deg) translateZ(calc(var(--card-h) / 2));
-    background: var(--edge-top);
-}
-
-.face-bottom {
-    transform: translate(-50%, -50%) rotateX(90deg) translateZ(calc(var(--card-h) / 2));
-    background: var(--edge-bottom);
-}
-
-.face-right {
-    transform: translate(-50%, -50%) rotateY(90deg) translateZ(calc(var(--card-w) / 2));
-    background: var(--edge-side);
-}
-
-.face-left {
-    transform: translate(-50%, -50%) rotateY(-90deg) translateZ(calc(var(--card-w) / 2));
-    background: var(--edge-side);
-}
-
+/* ---------- Card content: every size is a share of the card's width (cqw), so it scales as one ---------- */
+.ink { text-shadow: 0 1px 0 rgba(255,255,255,.55); }
 .card-inner {
-    width: 100%;
-    height: 100%;
-    padding: var(--card-pad);
+  position: absolute;
+  inset: 0;
+  padding: 7cqw;
 }
-
-/* ---------- Front ---------- */
-
-.front-inner {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
 .monogram {
-    position: absolute;
-    top: var(--card-pad);
-    right: var(--card-pad);
-    font-family: 'IBM Plex Serif', Georgia, serif;
-    font-size: calc(var(--card-w) * 0.058);
-    line-height: 1;
-    letter-spacing: -0.04em;
-    color: rgba(16, 15, 15, 0.32);
-    font-weight: 400;
-    user-select: none;
+  font-family: "IBM Plex Serif", Georgia, serif;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: rgba(16, 15, 15, .32);
 }
 
-.monogram-back {
-    position: static;
-    top: auto;
-    right: auto;
-    bottom: auto;
-    left: auto;
-    align-self: flex-end;
-    flex: 0 0 auto;
-    font-size: calc(var(--card-w) * 0.11);
+/* Front: small fd. top-right; large name and muted role, indented right. */
+.front-inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
-
-.details {
-    min-width: 0;
-    margin-left: calc(var(--card-w) * 0.09);
+.front-inner .monogram {
+  position: absolute;
+  top: 7cqw;
+  right: 7cqw;
+  font-size: 5.8cqw;
 }
-
+.details { margin-left: 9cqw; min-width: 0; }
 .name {
-    margin: 0;
-    font-size: calc(var(--card-w) * 0.098);
-    font-weight: 600;
-    line-height: 1.0;
-    color: var(--ink);
-    letter-spacing: -0.045em;
+  margin: 0;
+  font-size: 9.8cqw;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  color: var(--ink);
 }
-
 .role {
-    margin: calc(var(--card-w) * 0.022) 0 0;
-    font-size: calc(var(--card-w) * 0.046);
-    color: var(--muted);
-    font-weight: 400;
-    line-height: 1.2;
-    letter-spacing: -0.022em;
+  margin: 2.2cqw 0 0;
+  font-size: 4.6cqw;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.022em;
+  color: var(--muted);
 }
 
-/* ---------- Back ---------- */
-
+/* Back: large fd. bottom-left; "You found the back." and contact rows on the right. */
 .back-inner {
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    gap: calc(var(--card-w) * 0.07);
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 7cqw;
 }
-
-.back-content {
-    flex: 1 1 auto;
-    min-width: 0;
+.back-inner .monogram {
+  align-self: flex-end;
+  flex: 0 0 auto;
+  font-size: 11cqw;
 }
-
+.back-content { flex: 1 1 auto; min-width: 0; }
 .back-label {
-    margin: 0 0 calc(var(--card-w) * 0.05);
-    font-size: calc(var(--card-w) * 0.034);
-    color: var(--muted);
-    font-weight: 400;
-    letter-spacing: -0.01em;
+  margin: 0 0 5cqw;
+  font-size: 3.4cqw;
+  letter-spacing: -0.01em;
+  color: var(--muted);
 }
-
-/* ---------- Links (contact rows on the back) ---------- */
-
-.links {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.links li {
-    margin: calc(var(--card-w) * 0.012) 0;
-}
-
+.links { list-style: none; margin: 0; padding: 0; }
+.links li { margin: 1.2cqw 0; }
 .links a {
-    display: inline-flex;
-    align-items: center;
-    gap: calc(var(--card-w) * 0.024);
-    color: var(--ink);
-    text-decoration: none;
-    font-size: calc(var(--card-w) * 0.04);
-    line-height: 1.2;
-    transition: color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 2.4cqw;
+  font-size: 4cqw;
+  line-height: 1.2;
+  color: var(--ink);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color .2s ease;
 }
-
-.links a > span {
-    position: relative;
-}
-
+.links svg { width: 4.2cqw; height: 4.2cqw; flex: none; fill: currentColor; }
+.links a > span { position: relative; }
 .links a > span::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -2px;
-    height: 1px;
-    background: currentColor;
-    transform: scaleX(0);
-    transform-origin: 0 50%;
-    transition: transform 0.28s ease;
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform .28s ease;
 }
+.links a:hover, .links a:focus-visible { color: var(--active); outline: none; }
+.links a:hover > span::after, .links a:focus-visible > span::after { transform: scaleX(1); }
 
-.links a:hover {
-    color: var(--active);
+.hint {
+  margin: 0;
+  font-size: 13px;
+  letter-spacing: .01em;
+  color: var(--muted);
+  transition: opacity 1.2s ease;
 }
-
-.links a:hover > span::after {
-    transform: scaleX(1);
-}
-
-.links img {
-    width: calc(var(--card-w) * 0.042);
-    height: calc(var(--card-w) * 0.042);
-    display: block;
-    flex-shrink: 0;
-    pointer-events: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .card {
-        transition: none;
-    }
-}
+.hint.hidden { opacity: 0; transition-duration: .4s; }

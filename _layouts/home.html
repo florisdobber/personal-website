@@ -4,241 +4,655 @@
 {%- include head.html -%}
 
 <body>
-    <main class="stage">
-        <div class="scene">
-            <div class="shadow" aria-hidden="true"></div>
-            <div class="card" id="card">
-                <div class="face face-front">
-                    <div class="card-inner front-inner">
-                        <span class="monogram" aria-hidden="true">fd.</span>
-                        <div class="details">
-                            <h1 class="name">{{ site.name }}</h1>
-                            <p class="role">{{ site.job-title }}</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="face face-back">
-                    <div class="card-inner back-inner">
-                        <span class="monogram monogram-back" aria-hidden="true">fd.</span>
-                        <div class="back-content">
-                            <p class="back-label">You found the back.</p>
-                            <ul class="links">
-                                <li>
-                                    <a href="https://github.com/{{ site.github }}" rel="noopener">
-                                        <img src="{{ "/assets/images/github.svg" | relative_url }}" alt="" draggable="false" />
-                                        <span>@{{ site.github }}</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="https://www.linkedin.com/in/{{ site.linkedin }}/" rel="noopener">
-                                        <img src="{{ "/assets/images/linkedin.svg" | relative_url }}" alt="" draggable="false" />
-                                        <span>/{{ site.linkedin }}</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="mailto:{{ site.email }}">
-                                        <img src="{{ "/assets/images/email.svg" | relative_url }}" alt="" draggable="false" />
-                                        <span>{{ site.email }}</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="https://florisdobber.com" rel="noopener">
-                                        <img src="{{ "/assets/images/website.svg" | relative_url }}" alt="" draggable="false" />
-                                        <span>florisdobber.com</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="face face-top"></div>
-                <div class="face face-bottom"></div>
-                <div class="face face-left"></div>
-                <div class="face face-right"></div>
-            </div>
+<div class="table" aria-hidden="true"></div>
+<main>
+  <div class="stage" id="stage" tabindex="0" role="group"
+       aria-label="Business card. Drag to spin it. When the card is focused, Enter flips it and the arrow keys spin it.">
+    <!-- Cards lying underneath; filled in by script from the front face. -->
+    <div class="stack-card" aria-hidden="true" style="transform: translate(-1.2%, 2.4%) rotate(2.4deg)"></div>
+    <div class="stack-card" aria-hidden="true" style="transform: translate(1.4%, 1.1%) rotate(-1.5deg)"></div>
+    <div class="shadow amb" id="shadowAmb" aria-hidden="true"></div>
+    <div class="shadow soft" id="shadowSoft" aria-hidden="true"></div>
+    <div class="shadow sharp" id="shadowKey" aria-hidden="true"></div>
+
+    <div class="card" id="card">
+      <!-- Edge slices: give the card real thickness so it never vanishes edge-on. Positioned by script. -->
+      <div class="layer slice" aria-hidden="true"></div>
+      <div class="layer slice" aria-hidden="true"></div>
+      <div class="layer slice" aria-hidden="true"></div>
+      <div class="layer slice" aria-hidden="true"></div>
+      <div class="layer slice" aria-hidden="true"></div>
+
+      <div class="layer face" id="front">
+        <div class="card-inner front-inner">
+          <span class="monogram ink" aria-hidden="true">fd.</span>
+          <div class="details">
+            <h1 class="name ink">{{ site.name }}</h1>
+            <p class="role ink">{{ site.job-title }}</p>
+          </div>
         </div>
-    </main>
+        <div class="shade"></div>
+        <div class="sheen"></div>
+      </div>
 
-    <script>
-        (function () {
-            const card = document.getElementById('card');
-            const shadow = document.querySelector('.shadow');
+      <div class="layer face" id="back">
+        <div class="card-inner back-inner">
+          <span class="monogram ink" aria-hidden="true">fd.</span>
+          <div class="back-content">
+            <p class="back-label ink">You found the back.</p>
+            <ul class="links">
+              <li><a class="ink" href="https://github.com/{{ site.github }}" target="_blank" rel="noopener"><svg viewBox="0 0 496 512" aria-hidden="true" focusable="false"><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg><span>@{{ site.github }}</span></a></li>
+              <li><a class="ink" href="https://www.linkedin.com/in/{{ site.linkedin }}/" target="_blank" rel="noopener"><svg viewBox="0 0 448 512" aria-hidden="true" focusable="false"><path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 0 1 107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"/></svg><span>/{{ site.linkedin }}</span></a></li>
+              <li><a class="ink" href="mailto:{{ site.email }}"><svg viewBox="0 0 512 512" aria-hidden="true" focusable="false"><path d="M464 64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm0 48v40.805c-22.422 18.259-58.168 46.651-134.587 106.49-16.841 13.247-50.201 45.072-73.413 44.701-23.208.375-56.579-31.459-73.413-44.701C106.18 199.465 70.425 171.067 48 152.805V112h416zM48 400V214.398c22.914 18.251 55.409 43.862 104.938 82.646 21.857 17.205 60.134 55.186 103.062 54.955 42.717.231 80.509-37.199 103.053-54.947 49.528-38.783 82.032-64.401 104.947-82.653V400H48z"/></svg><span>{{ site.email }}</span></a></li>
+              <li><a class="ink" href="https://florisdobber.com" rel="noopener"><svg viewBox="0 0 512 512" aria-hidden="true" focusable="false"><path d="M351.9 280l-190.9 0c2.9 64.5 17.2 123.9 37.5 167.4 11.4 24.5 23.7 41.8 35.1 52.4 11.2 10.5 18.9 12.2 22.9 12.2s11.7-1.7 22.9-12.2c11.4-10.6 23.7-28 35.1-52.4 20.3-43.5 34.6-102.9 37.5-167.4zM160.9 232l190.9 0C349 167.5 334.7 108.1 314.4 64.6 303 40.2 290.7 22.8 279.3 12.2 268.1 1.7 260.4 0 256.4 0s-11.7 1.7-22.9 12.2c-11.4 10.6-23.7 28-35.1 52.4-20.3 43.5-34.6 102.9-37.5 167.4zm-48 0C116.4 146.4 138.5 66.9 170.8 14.7 78.7 47.3 10.9 131.2 1.5 232l111.4 0zM1.5 280c9.4 100.8 77.2 184.7 169.3 217.3-32.3-52.2-54.4-131.7-57.9-217.3L1.5 280zm398.4 0c-3.5 85.6-25.6 165.1-57.9 217.3 92.1-32.7 159.9-116.5 169.3-217.3l-111.4 0zm111.4-48C501.9 131.2 434.1 47.3 342 14.7 374.3 66.9 396.4 146.4 399.9 232l111.4 0z"/></svg><span>florisdobber.com</span></a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="shade"></div>
+        <div class="sheen"></div>
+      </div>
+    </div>
+  </div>
 
-            // baseX/Y is the rotation set by drag (and decaying inertia). The card
-            // stays wherever the user lands it after a drag.
-            let baseX = 0, baseY = 0;
-            let velX = 0, velY = 0;
+  <!-- Hidden at first. The card teaches itself with a one-time nudge; this only fades in for
+       visitors who still haven't touched it a few seconds later, and goes for good once they do.
+       Screen readers get the same instructions from the card's label. -->
+  <p class="hint hidden" id="hint" aria-hidden="true">Drag to spin · click to flip</p>
+</main>
 
-            let isPointerDown = false;
-            let dragged = false;
-            let pointerId = null;
-            let startX = 0, startY = 0;
-            let lastX = 0, lastY = 0, lastT = 0;
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const card = document.getElementById('card');
+  const shadowKey = document.getElementById('shadowKey');
+  const shadowAmb = document.getElementById('shadowAmb');
+  const shadowSoft = document.getElementById('shadowSoft');
+  const slices = [...card.querySelectorAll('.slice')];
+  const faces = {
+    front: document.getElementById('front'),
+    back: document.getElementById('back'),
+  };
+  const fx = {
+    front: { shade: faces.front.querySelector('.shade'), sheen: faces.front.querySelector('.sheen') },
+    back:  { shade: faces.back.querySelector('.shade'),  sheen: faces.back.querySelector('.sheen') },
+  };
 
-            const DRAG_THRESHOLD = 5;
-            const SENSITIVITY = 0.45;
-            const FRICTION = 0.94;
+  // ---------- Paper ----------
+  // Paper layers sit between the printed content and the lighting overlays on each face.
+  const PAPER_KEYS = ['base', 'xp', 'xn', 'yp', 'yn'];
+  for (const side of ['front', 'back']) {
+    fx[side].paper = {};
+    for (const key of PAPER_KEYS) {
+      const el = document.createElement('div');
+      el.className = 'paper ' + key;
+      el.setAttribute('aria-hidden', 'true');
+      faces[side].insertBefore(el, fx[side].shade);
+      fx[side].paper[key] = el;
+    }
+  }
 
-            // One-time settling wobble on load. Decaying sine on yaw (Y) plus a
-            // smaller pitch (X) at a slightly different frequency so peaks don't
-            // sync — keeps the motion reading as organic, not mechanical. Cancels
-            // on first pointerdown so it never fights user input.
-            const INTRO_DURATION_MS = 1300;
-            const INTRO_AMP_Y = 5.0;
-            const INTRO_AMP_X = 1.8;
-            const INTRO_FREQ_Y = 2.6;
-            const INTRO_FREQ_X = 3.1;
-            const INTRO_DECAY = 3.2;
-            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-            let introActive = !prefersReducedMotion;
-            let introStart = null;
+  // Builds the paper textures on a canvas: a seamless 512px tile of short, randomly oriented
+  // fibres plus fine tooth, turned into slope-lit images for four light directions.
+  // Nothing is downloaded and the result is the same on every visit (seeded).
+  function makePaper(done) {
+    const N = 512;
+    let seed = 20261108;
+    const rand = () => {                     // mulberry32
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
 
-            function applyTransform() {
-                const rotX = baseX;
-                const rotY = baseY;
-                card.style.transform =
-                    'rotateX(' + rotX.toFixed(3) + 'deg) ' +
-                    'rotateY(' + rotY.toFixed(3) + 'deg)';
+    // 1. Fibres, drawn with wrap-around so the tile repeats without seams.
+    const c = document.createElement('canvas');
+    c.width = c.height = N;
+    const g = c.getContext('2d', { willReadFrequently: true });
+    g.fillStyle = '#000';
+    g.fillRect(0, 0, N, N);
+    g.lineCap = 'round';
+    for (let i = 0; i < 4200; i++) {
+      const x = rand() * N, y = rand() * N, a = rand() * Math.PI;
+      const len = 3 + rand() * 8, bend = (rand() - 0.5) * 3;
+      const dx = Math.cos(a) * len / 2, dy = Math.sin(a) * len / 2;
+      g.strokeStyle = `rgba(255,255,255,${(0.06 + rand() * 0.10).toFixed(3)})`;
+      g.lineWidth = 0.6 + rand() * 0.7;
+      for (const ox of [-N, 0, N]) for (const oy of [-N, 0, N]) {
+        const cx = x + ox, cy = y + oy;
+        if (cx + len < 0 || cx - len > N || cy + len < 0 || cy - len > N) continue;
+        g.beginPath();
+        g.moveTo(cx - dx, cy - dy);
+        g.quadraticCurveTo(cx - dy * bend / len, cy + dx * bend / len, cx + dx, cy + dy);
+        g.stroke();
+      }
+    }
+    const fib = g.getImageData(0, 0, N, N).data;
 
-                if (shadow) {
-                    const X = rotX * Math.PI / 180;
-                    const Y = rotY * Math.PI / 180;
-                    const sX = Math.sin(X), cX = Math.cos(X);
-                    const sY = Math.sin(Y), cY = Math.cos(Y);
-                    const tilt = Math.max(Math.abs(sX), Math.abs(sY));
-                    // Visible shadow scales with the card's projected silhouette —
-                    // when edge-on its profile is essentially zero.
-                    const vis = Math.abs(cX * cY);
-                    shadow.style.setProperty('--shadow-dx', (-sY * 22).toFixed(1) + 'px');
-                    shadow.style.setProperty('--shadow-dy', (sX * 18).toFixed(1) + 'px');
-                    shadow.style.setProperty('--shadow-spread', (tilt * 14).toFixed(1) + 'px');
-                    shadow.style.setProperty('--shadow-vis', vis.toFixed(3));
-                }
-            }
+    // 2. Height = fibres + fine tooth, softened by a wrap-around 3x3 blur.
+    const raw = new Float32Array(N * N);
+    for (let i = 0; i < N * N; i++) raw[i] = fib[i * 4] / 255 + (rand() - 0.5) * 0.35;
+    const H = new Float32Array(N * N);
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      let s = 0;
+      for (let j = -1; j <= 1; j++) for (let i = -1; i <= 1; i++)
+        s += raw[((y + j + N) % N) * N + ((x + i + N) % N)] * (i && j ? 1 : i || j ? 2 : 4);
+      H[y * N + x] = s / 16;
+    }
 
-            applyTransform();
+    // 3. Slopes. A surface leaning toward +x is lit by light from +x, so shading is -dH/dx.
+    const SX = new Float32Array(N * N), SY = new Float32Array(N * N);
+    let ss = 0;
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      const i = y * N + x;
+      SX[i] = -(H[y * N + (x + 1) % N] - H[y * N + (x - 1 + N) % N]) / 2;
+      SY[i] = -(H[((y + 1) % N) * N + x] - H[((y - 1 + N) % N) * N + x]) / 2;
+      ss += SX[i] * SX[i] + SY[i] * SY[i];
+    }
+    const k = 1 / (2.6 * Math.sqrt(ss / (2 * N * N)));
 
-            function onDown(e) {
-                if (e.button !== undefined && e.button !== 0) return;
-                introActive = false;
-                isPointerDown = true;
-                dragged = false;
-                pointerId = e.pointerId;
-                startX = lastX = e.clientX;
-                startY = lastY = e.clientY;
-                lastT = performance.now();
-                velX = 0;
-                velY = 0;
-            }
+    // 4. Soft cloudiness: a few octaves of smooth value noise on wrapping grids.
+    const F = new Float32Array(N * N);
+    for (const [cells, amp] of [[12, 1], [28, 0.6], [64, 0.3]]) {
+      const grid = Array.from({ length: cells * cells }, rand);
+      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+        const gx = x / N * cells, gy = y / N * cells;
+        const x0 = Math.floor(gx), y0 = Math.floor(gy);
+        let tx = gx - x0, ty = gy - y0;
+        tx = tx * tx * (3 - 2 * tx); ty = ty * ty * (3 - 2 * ty);
+        const v = (xx, yy) => grid[(yy % cells) * cells + (xx % cells)];
+        const top = v(x0, y0) * (1 - tx) + v(x0 + 1, y0) * tx;
+        const bot = v(x0, y0 + 1) * (1 - tx) + v(x0 + 1, y0 + 1) * tx;
+        F[y * N + x] += (top * (1 - ty) + bot * ty - 0.5) * amp;
+      }
+    }
 
-            function onMove(e) {
-                if (!isPointerDown || e.pointerId !== pointerId) return;
+    // Signed value -> warm white (lit) or warm dark (shaded), with alpha.
+    const paint = (val, gainW, gainB) => {
+      const img = g.createImageData(N, N), d = img.data;
+      for (let i = 0; i < N * N; i++) {
+        const v = val(i), o = i * 4;
+        if (v > 0) { d[o] = 255; d[o + 1] = 253; d[o + 2] = 246; d[o + 3] = Math.min(255, v * gainW * 255); }
+        else       { d[o] = 46;  d[o + 1] = 36;  d[o + 2] = 24;  d[o + 3] = Math.min(255, -v * gainB * 255); }
+      }
+      g.putImageData(img, 0, 0);
+      return new Promise(res => c.toBlob(b => res(URL.createObjectURL(b))));
+    };
+    (async () => {
+      const urls = {
+        base: await paint(i => -F[i], 0.035, 0.035),
+        xp: await paint(i => SX[i] * k, 0.5, 0.6),
+        xn: await paint(i => -SX[i] * k, 0.5, 0.6),
+        yp: await paint(i => SY[i] * k, 0.5, 0.6),
+        yn: await paint(i => -SY[i] * k, 0.5, 0.6),
+      };
+      done(urls);
+    })();
+  }
 
-                const totalDX = e.clientX - startX;
-                const totalDY = e.clientY - startY;
+  // ---------- The stack underneath ----------
+  // Same front as the top card, so lifting the top one reveals another just like it.
+  const stackCards = [...stage.querySelectorAll('.stack-card')];
+  for (const sc of stackCards) {
+    const inner = faces.front.querySelector('.card-inner').cloneNode(true);
+    inner.querySelectorAll('h1').forEach(h => {          // one real <h1> on the page
+      const d = document.createElement('div');
+      d.className = h.className;
+      d.textContent = h.textContent;
+      h.replaceWith(d);
+    });
+    sc.appendChild(inner);
+  }
 
-                if (!dragged && Math.hypot(totalDX, totalDY) > DRAG_THRESHOLD) {
-                    dragged = true;
-                    card.classList.add('dragging');
-                    try { card.setPointerCapture(pointerId); } catch (err) { /* noop */ }
-                }
+  // Built just after the first paint, so it never delays the card appearing (~50–150 ms of work).
+  setTimeout(() => makePaper(urls => {
+    for (const side of ['front', 'back'])
+      for (const key of PAPER_KEYS) fx[side].paper[key].style.backgroundImage = `url(${urls[key]})`;
+    // The stack lies flat under the same light, so its paper is lit as the top card is at rest.
+    stackCards.forEach((sc, i) => {
+      for (const [key, op] of [['base', 1], ['xn', -LIGHT[0] * RELIEF], ['yn', -LIGHT[1] * RELIEF]]) {
+        const el = document.createElement('div');
+        el.className = 'paper';
+        el.style.backgroundImage = `url(${urls[key]})`;
+        el.style.backgroundPosition = `${57 + i * 101}px ${23 + i * 67}px`;
+        el.style.opacity = op.toFixed(3);
+        sc.appendChild(el);
+      }
+    });
+    render();
+    setTimeout(makeLinen, 30);
+  }), 60);
 
-                if (dragged) {
-                    const now = performance.now();
-                    const dt = Math.max(8, now - lastT);
-                    const dx = e.clientX - lastX;
-                    const dy = e.clientY - lastY;
+  // ---------- Linen for the table ----------
+  // A plain weave: threads alternate over and under. Linen's character comes from slubs, the
+  // irregular thick-and-thin stretches along each thread, plus slight tone differences between
+  // threads. Lit from the same direction as the card and baked into one static, seamless tile.
+  function makeLinen() {
+    const N = 512, P = 4, T = N / P;                // 128 threads each way, 4 texels per thread
+    let seed = 1108;
+    const rand = () => {
+      seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+      let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+    // Smooth periodic 1D noise along each thread (for slubs), N samples long.
+    const slubs = () => {
+      const k = 40, g = Array.from({ length: k }, () => Math.pow(rand(), 1.6));
+      const out = new Float32Array(N);
+      for (let i = 0; i < N; i++) {
+        const u = i / N * k, a = Math.floor(u);
+        let f = u - a; f = f * f * (3 - 2 * f);
+        out[i] = g[a % k] * (1 - f) + g[(a + 1) % k] * f;
+      }
+      return out;
+    };
+    const warpS = Array.from({ length: T }, slubs), weftS = Array.from({ length: T }, slubs);
+    const warpTone = Array.from({ length: T }, () => rand() - 0.5);
+    const warpW = Array.from({ length: T }, () => 0.6 + rand() * 0.8);   // some threads are simply thicker
+    const weftW = Array.from({ length: T }, () => 0.6 + rand() * 0.8);
+    const weftTone = Array.from({ length: T }, () => rand() - 0.5);
 
-                    baseY += dx * SENSITIVITY;
-                    baseX -= dy * SENSITIVITY;
+    const H = new Float32Array(N * N), tone = new Float32Array(N * N);
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      const i = Math.floor(x / P), j = Math.floor(y / P);
+      const warpUp = (i + j) % 2 === 0;
+      // Thread cross-section: a rounded bump across its width, thicker where it slubs.
+      const wx = Math.sin(Math.PI * ((x % P) + 0.5) / P), wy = Math.sin(Math.PI * ((y % P) + 0.5) / P);
+      const warpH = wx * (0.45 + 1.1 * warpS[i][y] * warpW[i]), weftH = wy * (0.45 + 1.1 * weftS[j][x] * weftW[j]);
+      const o = y * N + x;
+      H[o] = (warpUp ? warpH + 0.25 : weftH + 0.25) + (rand() - 0.5) * 0.12;   // fuzz
+      tone[o] = warpUp ? warpTone[i] : weftTone[j];
+    }
 
-                    velY = (dx * SENSITIVITY) / dt;
-                    velX = -(dy * SENSITIVITY) / dt;
+    // Uneven dyeing: soft blotches a few centimetres across.
+    const mottle = new Float32Array(N * N);
+    for (const [cells, amp] of [[4, 0.035], [9, 0.02]]) {
+      const grid = Array.from({ length: cells * cells }, rand);
+      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+        const gx = x / N * cells, gy = y / N * cells, x0 = Math.floor(gx), y0 = Math.floor(gy);
+        let tx = gx - x0, ty = gy - y0; tx = tx * tx * (3 - 2 * tx); ty = ty * ty * (3 - 2 * ty);
+        const v = (a, b) => grid[(b % cells) * cells + (a % cells)];
+        mottle[y * N + x] += ((v(x0, y0) * (1 - tx) + v(x0 + 1, y0) * tx) * (1 - ty) + (v(x0, y0 + 1) * (1 - tx) + v(x0 + 1, y0 + 1) * tx) * ty - 0.5) * amp;
+      }
+    }
 
-                    lastX = e.clientX;
-                    lastY = e.clientY;
-                    lastT = now;
+    const c = document.createElement('canvas');
+    c.width = c.height = N;
+    const g = c.getContext('2d');
+    const img = g.createImageData(N, N), d = img.data;
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      const o = y * N + x;
+      const sx = -(H[y * N + (x + 1) % N] - H[y * N + (x - 1 + N) % N]) / 2;
+      const sy = -(H[((y + 1) % N) * N + x] - H[((y - 1 + N) % N) * N + x]) / 2;
+      // Lambert-ish: slope toward the light brightens, away darkens; gaps between threads sit low.
+      const v = (sx * LIGHT[0] + sy * LIGHT[1]) * 0.42 + (H[o] - 0.75) * 0.07 + tone[o] * 0.07 + mottle[o];
+      const p = o * 4;
+      if (v > 0) { d[p] = 255; d[p + 1] = 252; d[p + 2] = 242; d[p + 3] = Math.min(255, v * 255); }
+      else       { d[p] = 46;  d[p + 1] = 36;  d[p + 2] = 24;  d[p + 3] = Math.min(255, -v * 255); }
+    }
+    g.putImageData(img, 0, 0);
+    c.toBlob(b => document.body.style.setProperty('--tex-linen', `url(${URL.createObjectURL(b)})`));
+  }
 
-                    applyTransform();
-                    e.preventDefault();
-                }
-            }
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hint = document.getElementById('hint');
+  if (matchMedia('(hover: none)').matches) hint.textContent = 'Drag to spin · tap to flip';
 
-            function onUp(e) {
-                if (!isPointerDown) return;
-                isPointerDown = false;
-                card.classList.remove('dragging');
-                if (pointerId !== null) {
-                    try { card.releasePointerCapture(pointerId); } catch (err) { /* noop */ }
-                }
-                pointerId = null;
-            }
+  // ---------- Quaternion helpers, [x, y, z, w]. CSS space: x right, y down, z toward the viewer. ----------
+  const qmul = (a, b) => [
+    a[3]*b[0] + a[0]*b[3] + a[1]*b[2] - a[2]*b[1],
+    a[3]*b[1] - a[0]*b[2] + a[1]*b[3] + a[2]*b[0],
+    a[3]*b[2] + a[0]*b[1] - a[1]*b[0] + a[2]*b[3],
+    a[3]*b[3] - a[0]*b[0] - a[1]*b[1] - a[2]*b[2],
+  ];
+  const qconj = q => [-q[0], -q[1], -q[2], q[3]];
+  const qnorm = q => { const l = Math.hypot(q[0], q[1], q[2], q[3]) || 1; return [q[0]/l, q[1]/l, q[2]/l, q[3]/l]; };
+  const fromRotVec = v => {
+    const a = Math.hypot(v[0], v[1], v[2]);
+    if (a < 1e-9) return [0, 0, 0, 1];
+    const s = Math.sin(a / 2) / a;
+    return [v[0]*s, v[1]*s, v[2]*s, Math.cos(a / 2)];
+  };
+  const toMat = q => {
+    const [x, y, z, w] = q;
+    return [
+      1 - 2*(y*y + z*z), 2*(x*y - z*w),     2*(x*z + y*w),
+      2*(x*y + z*w),     1 - 2*(x*x + z*z), 2*(y*z - x*w),
+      2*(x*z - y*w),     2*(y*z + x*w),     1 - 2*(x*x + y*y),
+    ];
+  };
+  const len3 = v => Math.hypot(v[0], v[1], v[2]);
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+  const norm3 = v => { const l = len3(v) || 1; return [v[0]/l, v[1]/l, v[2]/l]; };
 
-            card.addEventListener('pointerdown', onDown);
-            card.addEventListener('pointermove', onMove);
-            card.addEventListener('pointerup', onUp);
-            card.addEventListener('pointercancel', onUp);
+  // ---------- Tuning ----------
+  const REST = [[0, 0, 0, 1], [0, 1, 0, 0]];      // front facing / back facing (turned about the vertical axis)
+  const K = reduceMotion ? 300 : 35;              // spring stiffness toward the resting pose
+  const C = 2 * Math.sqrt(K) * (reduceMotion ? 1 : 0.6); // damping (slightly bouncy unless reduced motion)
+  const FRICTION = 1.1;                           // air drag on free spins, per second
+  const FREE_SPIN = 7;                            // rad/s: release faster than this and the card spins freely
+  const SETTLE_SPIN = 3;                          // rad/s: free spin hands over to the settle spring below this
+  const HOVER_TILT = 0.11;                        // rad of "press" tilt under the cursor
+  const LIGHT = norm3([-0.35, -0.55, 0.76]);      // key light: up-left, in front
+  const HALF = norm3([LIGHT[0], LIGHT[1], LIGHT[2] + 1]);
+  const RELIEF = 0.32;                            // strength of the paper's raking-light texture
 
-            card.addEventListener('click', function (e) {
-                if (dragged) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
-            }, true);
+  // ---------- State ----------
+  let q = reduceMotion ? [0, 0, 0, 1] : qnorm(fromRotVec([0.55, -0.95, 0.12])); // a little toss on load
+  let w = [0, 0, 0];          // angular velocity, rad/s, world space
+  let lift = reduceMotion ? 0 : 1;
+  let side = 0;               // 0 front, 1 back
+  let freeSpin = false;
+  let spring = 0;             // 0..1, eases the settle spring in after a release
+  let hover = null;           // {x, y} in -1..1 over the stage, mouse only
+  let dragging = false;
+  let errAngle = 0;
+  let size = 510, sens = 0.008;
 
-            card.addEventListener('dragstart', function (e) { e.preventDefault(); });
+  const facing = () => (toMat(q)[8] >= 0 ? 0 : 1);
 
-            let lastFrame = performance.now();
-            function loop(now) {
-                const frameDt = Math.min(50, now - lastFrame);
-                lastFrame = now;
+  // A soft rounded-rectangle shadow, blurred once on a canvas. The shape is drawn far off-canvas and
+  // only its shadow is offset back in, which is the one blur method every browser's canvas supports.
+  function shadowImage(w, h, blur, pad) {
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const c = document.createElement('canvas');
+    c.width = Math.ceil((w + 2 * pad) * dpr);
+    c.height = Math.ceil((h + 2 * pad) * dpr);
+    const ctx = c.getContext('2d');
+    const off = c.width + 50;                       // device px
+    const r = 3 * dpr, x = pad * dpr - off, y = pad * dpr, rw = w * dpr, rh = h * dpr;
+    ctx.shadowColor = 'rgb(46, 34, 22)';
+    ctx.shadowBlur = 2 * blur * dpr;                // canvas shadowBlur ≈ 2 × the CSS blur radius
+    ctx.shadowOffsetX = off;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + rw, y, x + rw, y + rh, r);
+    ctx.arcTo(x + rw, y + rh, x, y + rh, r);
+    ctx.arcTo(x, y + rh, x, y, r);
+    ctx.arcTo(x, y, x + rw, y, r);
+    ctx.closePath();
+    ctx.fill();
+    return c.toDataURL('image/png');
+  }
 
-                let needsUpdate = false;
+  function layout() {
+    size = Math.max(stage.clientWidth, stage.clientHeight);   // long side, so the upright phone card behaves the same
+    const k = size / 510;
+    stage.style.setProperty('--tile', (340 * k).toFixed(1) + 'px');   // fibres scale with the card
+    const w = stage.clientWidth, h = stage.clientHeight;
+    if (w !== layout.w || h !== layout.h) for (const [el, blur] of [[shadowKey, 3], [shadowSoft, 22], [shadowAmb, 32]]) {
+      const b = blur * k, pad = Math.ceil(b * 2.5) + 2;
+      el.style.inset = `-${pad}px`;
+      el.style.backgroundImage = `url(${shadowImage(w, h, b, pad)})`;
+    }
+    layout.w = w; layout.h = h;
+    sens = 4 / size;                                  // dragging across the card ≈ 4 rad
+    const t = Math.max(1.6, size * 0.0048);           // ~0.4 mm card stock at real size
+    faces.front.style.transform = `translateZ(${t/2}px)`;
+    faces.back.style.transform = `rotateY(180deg) translateZ(${t/2}px)`;
+    slices.forEach((s, i) => {
+      const z = -t/2 + t * (i + 1) / (slices.length + 1);
+      s.style.transform = `translateZ(${z}px)`;
+    });
+  }
 
-                if (introActive) {
-                    if (introStart === null) introStart = now;
-                    const t = (now - introStart) / 1000;
-                    if (t * 1000 >= INTRO_DURATION_MS) {
-                        introActive = false;
-                        baseX = 0;
-                        baseY = 0;
-                    } else {
-                        const env = Math.exp(-t * INTRO_DECAY);
-                        const TAU = Math.PI * 2;
-                        baseY = INTRO_AMP_Y * env * Math.sin(t * INTRO_FREQ_Y * TAU);
-                        baseX = INTRO_AMP_X * env * Math.sin(t * INTRO_FREQ_X * TAU);
-                    }
-                    needsUpdate = true;
-                }
+  // ---------- Simulation ----------
+  function step(dt) {
+    if (dragging) return;
+    const speed = len3(w);
 
-                if (!isPointerDown) {
-                    const speed = Math.hypot(velX, velY);
-                    if (speed > 0.0008) {
-                        // Inertia decays on the base rotation, leaving the card wherever it lands.
-                        baseX += velX * frameDt;
-                        baseY += velY * frameDt;
-                        const decay = Math.pow(FRICTION, frameDt / 16);
-                        velX *= decay;
-                        velY *= decay;
-                        needsUpdate = true;
-                    }
-                }
+    if (freeSpin) {
+      side = facing();
+      if (speed < SETTLE_SPIN) { freeSpin = false; spring = 0; }
+    }
+    spring = freeSpin ? 0 : Math.min(1, spring + dt / 0.35);
 
-                if (needsUpdate) applyTransform();
-                requestAnimationFrame(loop);
-            }
+    let target = REST[side];
+    if (hover && !reduceMotion) target = qmul(fromRotVec([-hover.y * HOVER_TILT, hover.x * HOVER_TILT, 0]), target);
 
-            requestAnimationFrame(loop);
+    let e = qmul(target, qconj(q));
+    if (e[3] < 0) e = e.map(v => -v);
+    errAngle = 2 * Math.acos(Math.min(1, e[3]));
+    const s = Math.sqrt(Math.max(0, 1 - e[3]*e[3]));
+    const axis = s < 1e-6 ? [0, 0, 0] : [e[0]/s, e[1]/s, e[2]/s];
 
-            window.addEventListener('blur', function () {
-                if (isPointerDown) {
-                    isPointerDown = false;
-                    card.classList.remove('dragging');
-                    pointerId = null;
-                }
-            });
-        })();
-    </script>
+    const k = K * spring, c = C * spring;
+    for (let i = 0; i < 3; i++) w[i] += (k * axis[i] * errAngle - c * w[i]) * dt;
+    const drag = Math.exp(-FRICTION * dt);
+    for (let i = 0; i < 3; i++) w[i] *= drag;
+
+    q = qnorm(qmul(fromRotVec([w[0]*dt, w[1]*dt, w[2]*dt]), q));
+
+    if (!freeSpin && spring === 1 && len3(w) < 0.02 && errAngle < 0.002) {
+      q = target; w = [0, 0, 0]; errAngle = 0;
+    }
+  }
+
+  function render() {
+    const m = toMat(q);
+    const k = size / 510;
+
+    card.style.transform =
+      `translateZ(${(lift * 0.09 * size).toFixed(2)}px) ` +
+      `matrix3d(${m[0]},${m[3]},${m[6]},0,${m[1]},${m[4]},${m[7]},0,${m[2]},${m[5]},${m[8]},0,0,0,0,1)`;
+
+    // Shadow = the card's footprint projected flat onto the table, pushed away from the light as it lifts.
+    const foot = `matrix(${m[0]},${m[3]},${m[1]},${m[4]},0,0)`;
+    const keyT = `translate(${((5 + 30*lift) * k).toFixed(1)}px, ${((8 + 44*lift) * k).toFixed(1)}px) ${foot} scale(${1 + 0.03*lift})`;
+    shadowKey.style.transform = keyT;
+    shadowSoft.style.transform = keyT;
+    shadowKey.style.opacity = (0.3 * (1 - lift)).toFixed(3);
+    shadowSoft.style.opacity = (0.06 + 0.11 * lift).toFixed(3);
+    shadowAmb.style.transform = `translate(0px, ${((16 + 34*lift) * k).toFixed(1)}px) ${foot} scale(${1.03 + 0.06*lift})`;
+    shadowAmb.style.opacity = (0.17 - 0.06*lift).toFixed(3);
+
+    // Show only the side that faces the viewer. backface-visibility alone is unreliable in Safari
+    // (it ignores it for faces whose children get their own layers, like the animated shading).
+    // The card's plane passes through its centre, so with the viewer on the z axis the facing
+    // test under perspective is exactly the sign of the normal's z.
+    const frontUp = m[8] >= 0;
+    faces.front.style.visibility = frontUp ? 'visible' : 'hidden';
+    faces.back.style.visibility = frontUp ? 'hidden' : 'visible';
+
+    // Paper relief: the light's direction in the visible face's own coordinates. Its in-plane part
+    // (lx, ly) says which slopes are lit and how hard the light rakes; once the face turns past
+    // edge-on to the light (lz < 0) there's no direct light left to show texture.
+    {
+      let lx = m[0]*LIGHT[0] + m[3]*LIGHT[1] + m[6]*LIGHT[2];
+      const ly = m[1]*LIGHT[0] + m[4]*LIGHT[1] + m[7]*LIGHT[2];
+      let lz = m[2]*LIGHT[0] + m[5]*LIGHT[1] + m[8]*LIGHT[2];
+      if (!frontUp) { lx = -lx; lz = -lz; }               // the back face's x and z run the other way
+      const p = fx[frontUp ? 'front' : 'back'].paper;
+      const s = RELIEF * clamp((lz + 0.15) / 0.3, 0, 1);
+      p.xp.style.opacity = (Math.max(0, lx) * s).toFixed(3);
+      p.xn.style.opacity = (Math.max(0, -lx) * s).toFixed(3);
+      p.yp.style.opacity = (Math.max(0, ly) * s).toFixed(3);
+      p.yn.style.opacity = (Math.max(0, -ly) * s).toFixed(3);
+    }
+
+    // Diffuse shading: each face darkens as it turns away from the light.
+    const n = [m[2], m[5], m[8]];
+    const lam = n[0]*LIGHT[0] + n[1]*LIGHT[1] + n[2]*LIGHT[2];
+    const rest = LIGHT[2];
+    fx.front.shade.style.opacity = clamp((rest - lam) * 0.5, 0, 0.55).toFixed(3);
+    fx.back.shade.style.opacity = clamp((rest + lam) * 0.5, 0, 0.55).toFixed(3);
+
+    // Soft sheen: the light's half-vector in each face's own coordinates places and sizes the highlight.
+    const hx = m[0]*HALF[0] + m[3]*HALF[1] + m[6]*HALF[2];
+    const hy = m[1]*HALF[0] + m[4]*HALF[1] + m[7]*HALF[2];
+    const hz = m[2]*HALF[0] + m[5]*HALF[1] + m[8]*HALF[2];
+    const sheen = (el, x, y, z) => {
+      const i = Math.pow(Math.max(0, z), 6) * 0.38;
+      el.style.opacity = i.toFixed(3);
+      el.style.background =
+        `radial-gradient(circle at ${(50 + x*140).toFixed(1)}% ${(50 + y*140).toFixed(1)}%, rgba(255,255,255,.75), rgba(255,255,255,0) 62%)`;
+    };
+    sheen(fx.front.sheen, hx, hy, hz);
+    sheen(fx.back.sheen, -hx, hy, -hz);
+  }
+
+  // ---------- Loop (sleeps when the card is at rest) ----------
+  let running = false, last = 0;
+  function frame(t) {
+    const dt = Math.min(1 / 30, Math.max(0.001, (t - last) / 1000));
+    last = t;
+    step(dt);
+    const liftTarget = dragging || freeSpin || len3(w) > 2.5 ? 1 : 0;
+    lift += (liftTarget - lift) * (1 - Math.exp(-7 * dt));
+    render();
+    const busy = dragging || freeSpin || len3(w) > 0.001 || errAngle > 0.0005 || Math.abs(lift - liftTarget) > 0.001;
+    if (busy) requestAnimationFrame(frame);
+    else running = false;
+  }
+  function wake() {
+    if (running) return;
+    running = true;
+    last = performance.now();
+    requestAnimationFrame(frame);
+  }
+
+  function flip() {
+    side = 1 - side;
+    freeSpin = false;
+    spring = 1;
+    if (!reduceMotion) w[1] += side ? 5 : -5;   // pick a direction so the turn starts cleanly
+    wake();
+  }
+
+  // ---------- Input ----------
+  let down = null, lastMove = 0, lastX = 0, lastY = 0;
+
+  function hoverFrom(e) {
+    if (e.pointerType !== 'mouse') return;
+    const r = stage.getBoundingClientRect();
+    hover = {
+      x: clamp(((e.clientX - r.left) / r.width) * 2 - 1, -1, 1),
+      y: clamp(((e.clientY - r.top) / r.height) * 2 - 1, -1, 1),
+    };
+  }
+
+  stage.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
+    engage();
+    stage.setPointerCapture(e.pointerId);
+    dragging = true;
+    freeSpin = false;
+    w = [0, 0, 0];                  // catching the card stops it
+    down = { x: e.clientX, y: e.clientY, t: performance.now(), moved: 0, target: e.target };
+    lastX = e.clientX; lastY = e.clientY; lastMove = performance.now();
+    stage.classList.add('dragging');
+    wake();
+  });
+
+  stage.addEventListener('pointermove', e => {
+    if (!dragging) { hoverFrom(e); wake(); return; }
+    const now = performance.now();
+    const dx = e.clientX - lastX, dy = e.clientY - lastY;
+    const dt = Math.max(0.004, (now - lastMove) / 1000);
+    lastX = e.clientX; lastY = e.clientY; lastMove = now;
+    down.moved += Math.hypot(dx, dy);
+
+    const rot = [-dy * sens, dx * sens, 0];     // the point under your finger follows your finger
+    q = qnorm(qmul(fromRotVec(rot), q));
+    for (let i = 0; i < 3; i++) w[i] += (rot[i] / dt - w[i]) * 0.5;   // smoothed release velocity
+    wake();
+  });
+
+  function release(e, cancelled) {
+    if (!dragging) return;
+    dragging = false;
+    stage.classList.remove('dragging');
+    const held = performance.now() - down.t;
+
+    if (!cancelled && down.moved < 6 && held < 450) {
+      // A tap. On a link it follows the link; anywhere else it flips the card.
+      const link = down.target.closest && down.target.closest('a[href]');
+      const showing = side === 0 ? faces.front : faces.back;
+      if (link && showing.contains(link)) {
+        allowClick = true;
+        link.click();
+        allowClick = false;
+      } else {
+        w = [0, 0, 0];
+        flip();
+      }
+      return;
+    }
+
+    if (performance.now() - lastMove > 90) w = [0, 0, 0];   // held still before letting go
+    const speed = len3(w);
+    if (speed > 40) w = w.map(v => v * 40 / speed);
+
+    if (!reduceMotion && speed > FREE_SPIN) {
+      freeSpin = true;
+    } else {
+      side = facing();
+      spring = reduceMotion ? 1 : 0;
+      if (reduceMotion) w = [0, 0, 0];
+    }
+    if (e && e.pointerType === 'mouse') hoverFrom(e);
+    wake();
+  }
+  stage.addEventListener('pointerup', e => release(e, false));
+  stage.addEventListener('pointercancel', e => release(e, true));
+  stage.addEventListener('pointerleave', () => { if (!dragging) { hover = null; wake(); } });
+
+  // The card owns pointer gestures, so the browser's own clicks on its links are cancelled and
+  // taps are routed above. Keyboard activation of a focused link (detail === 0) still works.
+  let allowClick = false;
+  stage.addEventListener('click', e => {
+    if (!allowClick && e.detail !== 0) e.preventDefault();
+  }, true);
+
+  stage.addEventListener('keydown', e => {
+    if (e.target !== stage) return;   // keys on a focused link belong to the link
+    const spin = { ArrowLeft: [0, -14, 0], ArrowRight: [0, 14, 0], ArrowUp: [14, 0, 0], ArrowDown: [-14, 0, 0] }[e.key];
+    if (spin || e.key === 'Enter' || e.key === ' ') engage();
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      flip();
+    } else if (spin) {
+      e.preventDefault();
+      if (reduceMotion) { flip(); return; }
+      for (let i = 0; i < 3; i++) w[i] += spin[i];
+      freeSpin = true;
+      wake();
+    }
+  });
+
+  // ---------- Teaching without words ----------
+  // Nothing happens if the visitor touches the card first. Otherwise, after NUDGE_AT seconds the
+  // card gets one small knock, as if the table were bumped: it turns about 30°, showing its edge
+  // and a sliver of the back, then settles. If they still haven't touched it by HINT_AT, the text
+  // hint fades in. Both are one-offs, and the clock only runs while the page is actually visible.
+  const NUDGE_AT = 4, HINT_AT = 9;
+  let engaged = false, idle = 0, nudged = false;
+  function engage() {
+    if (engaged) return;
+    engaged = true;
+    hint.classList.add('hidden');
+    clearInterval(idleTimer);
+  }
+  function nudge() {
+    if (engaged || dragging || reduceMotion) return;
+    nudged = true;
+    freeSpin = false;
+    spring = 1;
+    w = [-1.3, 9.8, 0.5];          // mostly a turn about the vertical axis, with a little tip
+    wake();
+  }
+  const idleTimer = setInterval(() => {
+    if (engaged || document.visibilityState !== 'visible') return;
+    idle += 0.25;
+    if (!nudged && idle >= NUDGE_AT) nudge();
+    if (idle >= HINT_AT) { hint.classList.remove('hidden'); clearInterval(idleTimer); }
+  }, 250);
+
+  addEventListener('resize', () => { layout(); render(); });
+  layout();
+  render();
+  wake();
+})();
+</script>
 </body>
-
 </html>
